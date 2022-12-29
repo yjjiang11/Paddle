@@ -38,7 +38,6 @@ from paddle.fluid.framework import (
     _dygraph_tracer,
     _enable_legacy_dygraph,
     _in_eager_without_dygraph_check,
-    _in_legacy_dygraph,
     _test_eager_guard,
 )
 from paddle.fluid.op import Operator
@@ -716,7 +715,7 @@ class OpTest(unittest.TestCase):
 
                 if if_return_inputs_grad_dict:
                     v.stop_gradient = False
-                    if not _in_legacy_dygraph():
+                    if hasattr(v, "retain_grads"):
                         v.retain_grads()
 
                 if has_lod:
@@ -2515,22 +2514,14 @@ class OpTest(unittest.TestCase):
                 for no_grad_val in no_grad_set:
                     del inputs[no_grad_val]
 
-                if not _in_legacy_dygraph():
-                    core.eager.run_backward(
+                core.eager.run_backward(
                         fluid.layers.utils.flatten(outputs), grad_outputs, False
                     )
-                    grad_inputs = []
-                    for inputs_list in inputs.values():
+                grad_inputs = []
+                for inputs_list in inputs.values():
                         for inp in inputs_list:
                             grad_inputs.append(inp.grad.numpy())
-                    return grad_inputs
-                else:
-                    grad_inputs = paddle.grad(
-                        outputs=fluid.layers.utils.flatten(outputs),
-                        inputs=fluid.layers.utils.flatten(inputs),
-                        grad_outputs=grad_outputs,
-                    )
-                    return [grad.numpy() for grad in grad_inputs]
+                return grad_inputs
 
     @staticmethod
     def _numpy_to_lod_tensor(np_value, lod, place):

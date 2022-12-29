@@ -237,9 +237,6 @@ def in_dygraph_mode():
     return (_dygraph_tracer_ is not None) and _in_eager_mode_
 
 
-def _in_legacy_dygraph():
-    return (not _in_eager_mode_) and (_dygraph_tracer_ is not None)
-
 
 def _non_static_mode():
     return _dygraph_tracer_ is not None
@@ -255,7 +252,8 @@ def _test_eager_guard(place=None):
     try:
         yield
     finally:
-        pass
+        if not already_fallback:
+            _enable_legacy_dygraph()
 
 
 global_ipu_index = -1
@@ -1334,8 +1332,6 @@ class VariableMetaClass(type):
         if in_dygraph_mode():
             return issubclass(t, core.eager.Tensor)
         else:
-            if _in_legacy_dygraph():
-                return issubclass(t, core.VarBase)
             return issubclass(t, Variable)
 
 
@@ -1346,8 +1342,6 @@ class ParameterMetaClass(VariableMetaClass):
         if in_dygraph_mode():
             return issubclass(t, EagerParamBase)
         else:
-            if _in_legacy_dygraph():
-                return issubclass(t, ParamBase)
             return issubclass(t, Parameter)
 
 
@@ -3893,19 +3887,6 @@ class Block:
                     error_clip=error_clip,
                 )
             else:
-                if _in_legacy_dygraph():
-                    var = ParamBase(
-                        d.shape(),
-                        d.dtype(),
-                        type=orig_var_type,
-                        name=new_name,
-                        stop_gradient=stop_gradient,
-                        trainable=trainable,
-                        optimize_attr=optimize_attr,
-                        regularizer=regularizer,
-                        error_clip=error_clip,
-                    )
-                else:
                     var = Parameter(
                         self,
                         d.shape(),
@@ -3946,9 +3927,6 @@ class Block:
         if in_dygraph_mode():
             param = EagerParamBase(*args, **kwargs)
         else:
-            if _in_legacy_dygraph():
-                param = ParamBase(*args, **kwargs)
-            else:
                 param = Parameter(global_block, *args, **kwargs)
 
         if 'initializer' in kwargs:
@@ -4262,20 +4240,6 @@ class Block:
                     name=v.name,
                 )
             else:
-                if _in_legacy_dygraph():
-                    new_p = ParamBase(
-                        shape=v.shape,
-                        dtype=v.dtype,
-                        type=v.type,
-                        lod_level=v.lod_level,
-                        stop_gradient=p.stop_gradient,
-                        trainable=p.trainable,
-                        optimize_attr=p.optimize_attr,
-                        regularizer=p.regularizer,
-                        error_clip=p.error_clip,
-                        name=v.name,
-                    )
-                else:
                     new_p = Parameter(
                         block=self,
                         shape=v.shape,
