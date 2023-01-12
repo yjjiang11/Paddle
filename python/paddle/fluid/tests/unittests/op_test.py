@@ -944,7 +944,9 @@ class OpTest(unittest.TestCase):
             for inp in inp_args:
                 assert isinstance(
                     inp, list
-                ), "currently only support `X` is [Tensor], don't support other structure."
+                ), "currently only support `X` is [Tensor], don't support {}.".format(
+                    inp
+                )
             args = [
                 inp[0] if len(inp) == 1 else inp for inp in inp_args
             ] + args[inp_num:]
@@ -1533,8 +1535,9 @@ class OpTest(unittest.TestCase):
     ):
 
         # disable legacy dygraph check when check_eager is True
-        if check_eager:
+        if check_eager or check_dygraph:
             check_dygraph = False
+            check_eager = True
 
         def find_imperative_actual(target_name, dygraph_outs, place):
             for name in dygraph_outs:
@@ -1993,8 +1996,9 @@ class OpTest(unittest.TestCase):
     ):
 
         # disable legacy dygraph check when check_eager is True
-        if check_eager:
+        if check_eager or check_dygraph:
             check_dygraph = False
+            check_eager = True
 
         self.__class__.op_type = self.op_type
         if self.is_mkldnn_op():
@@ -2134,8 +2138,9 @@ class OpTest(unittest.TestCase):
     ):
 
         # disable legacy dygraph check when check_eager is True
-        if check_eager:
+        if check_eager or check_dygraph:
             check_dygraph = False
+            check_eager = True
 
         self._check_grad_helper()
         places = self._get_places()
@@ -2171,8 +2176,9 @@ class OpTest(unittest.TestCase):
     ):
 
         # disable legacy dygraph check when check_eager is True
-        if check_eager:
+        if check_eager or check_dygraph:
             check_dygraph = False
+            check_eager = True
 
         self.scope = core.Scope()
         op_inputs = self.inputs if hasattr(self, "inputs") else dict()

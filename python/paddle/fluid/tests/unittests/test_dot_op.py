@@ -15,11 +15,11 @@
 import unittest
 
 import numpy as np
-from op_test import OpTest
 
 import paddle
 import paddle.fluid as fluid
 import paddle.fluid.core as core
+from op_test import OpTest
 from paddle.fluid import Program, program_guard
 
 
@@ -216,6 +216,7 @@ class TestComplexDotOp(OpTest):
 class TestComplexDotOp2D(OpTest):
     def setUp(self):
         self.op_type = "dot"
+        self.python_api = paddle.dot
         self.init_base_dtype()
         self.init_input_output()
         self.init_grad_input_output()

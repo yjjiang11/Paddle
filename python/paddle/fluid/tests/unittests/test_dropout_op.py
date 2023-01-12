@@ -15,12 +15,12 @@
 import unittest
 
 import numpy as np
-from op_test import OpTest, convert_float_to_uint16, skip_check_grad_ci
 
 import paddle
 import paddle.fluid as fluid
 import paddle.fluid.core as core
 import paddle.static as static
+from op_test import OpTest, convert_float_to_uint16, skip_check_grad_ci
 from paddle import _C_ops
 from paddle.fluid import Program, program_guard
 
@@ -28,6 +28,7 @@ from paddle.fluid import Program, program_guard
 class TestDropoutOp(OpTest):
     def setUp(self):
         self.op_type = "dropout"
+        self.python_api = paddle.nn.functional.dropout
         self.inputs = {'X': np.random.random((32, 64)).astype("float32")}
         self.attrs = {'dropout_prob': 0.0, 'fix_seed': True, 'is_test': False}
         self.outputs = {
@@ -204,6 +205,7 @@ class TestDropoutOpWithSeed(OpTest):
 class TestFP16DropoutOp(OpTest):
     def setUp(self):
         self.op_type = "dropout"
+        self.python_api = paddle.nn.functional.dropout
         self.init_test_case()
 
         x = np.random.random(self.input_size).astype("float16")

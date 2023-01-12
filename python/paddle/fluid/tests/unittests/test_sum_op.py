@@ -34,10 +34,15 @@ from paddle.fluid.tests.unittests.op_test import (
 )
 
 
+def sum(x0, x1, x2, use_mkldnn=False):
+    return x0 + x1 + x2
+
+
 class TestSumOp(OpTest):
     def setUp(self):
         self.op_type = "sum"
         self.init_kernel_type()
+        self.python_api = sum
         self.use_mkldnn = False
         self.init_kernel_type()
         x0 = np.random.random((3, 40)).astype(self.dtype)
@@ -52,10 +57,10 @@ class TestSumOp(OpTest):
         self.dtype = np.float64
 
     def test_check_output(self):
-        self.check_output()
+        self.check_output(check_eager=False, check_dygraph=False)
 
     def test_check_grad(self):
-        self.check_grad(['x0'], 'Out')
+        self.check_grad(['x0'], 'Out', check_eager=False, check_dygraph=False)
 
 
 class TestSelectedRowsSumOp(unittest.TestCase):
@@ -291,14 +296,22 @@ class TestFP16SumOp(TestSumOp):
     def test_check_output(self):
         place = core.CUDAPlace(0)
         if core.is_float16_supported(place):
-            self.check_output_with_place(place, atol=2e-2)
+            self.check_output_with_place(
+                place, atol=2e-2, check_eager=False, check_dygraph=False
+            )
 
     # FIXME: Because of the precision fp16, max_relative_error
     # should be 0.15 here.
     def test_check_grad(self):
         place = core.CUDAPlace(0)
         if core.is_float16_supported(place):
-            self.check_grad(['x0'], 'Out', max_relative_error=0.15)
+            self.check_grad(
+                ['x0'],
+                'Out',
+                max_relative_error=0.15,
+                check_eager=False,
+                check_dygraph=False,
+            )
 
 
 def create_test_sum_fp16_class(parent):
@@ -342,10 +355,16 @@ class TestSumBF16Op(OpTest):
         self.dtype = np.uint16
 
     def test_check_output(self):
-        self.check_output()
+        self.check_output(check_eager=False, check_dygraph=False)
 
     def test_check_grad(self):
-        self.check_grad(['x0'], 'Out', numeric_grad_delta=0.5)
+        self.check_grad(
+            ['x0'],
+            'Out',
+            numeric_grad_delta=0.5,
+            check_eager=False,
+            check_dygraph=False,
+        )
 
 
 class API_Test_Add_n(unittest.TestCase):

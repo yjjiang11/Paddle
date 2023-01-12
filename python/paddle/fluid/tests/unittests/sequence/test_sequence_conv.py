@@ -18,6 +18,8 @@ import unittest
 
 import numpy as np
 
+import paddle
+
 sys.path.append("../")
 from op_test import OpTest
 
@@ -283,6 +285,7 @@ class TestSeqConvApi(unittest.TestCase):
     def test_api(self):
         import paddle.fluid as fluid
 
+        paddle.enable_static()
         x = fluid.layers.data('x', shape=[32], lod_level=1)
         y = fluid.layers.sequence_conv(
             input=x, num_filters=2, filter_size=3, padding_start=None
@@ -295,6 +298,7 @@ class TestSeqConvApi(unittest.TestCase):
         exe = fluid.Executor(place)
         exe.run(fluid.default_startup_program())
         ret = exe.run(feed={'x': x_tensor}, fetch_list=[y], return_numpy=False)
+        paddle.diable_static()
 
 
 if __name__ == '__main__':

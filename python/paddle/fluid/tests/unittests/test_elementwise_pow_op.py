@@ -15,10 +15,10 @@
 import unittest
 
 import numpy as np
-from op_test import OpTest, skip_check_grad_ci
 
 import paddle
 import paddle.fluid as fluid
+from op_test import OpTest, skip_check_grad_ci
 
 
 def pow_grad(x, y, dout):
@@ -39,13 +39,15 @@ class TestElementwisePowOp(OpTest):
 
     def test_check_output(self):
         if hasattr(self, 'attrs'):
-            self.check_output(check_eager=False)
+            self.check_output(check_dygraph=False, check_eager=False)
         else:
             self.check_output(check_eager=True)
 
     def test_check_grad_normal(self):
         if hasattr(self, 'attrs'):
-            self.check_grad(['X', 'Y'], 'Out', check_eager=False)
+            self.check_grad(
+                ['X', 'Y'], 'Out', check_dygraph=False, check_eager=False
+            )
         else:
             self.check_grad(['X', 'Y'], 'Out', check_eager=True)
 

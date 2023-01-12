@@ -16,11 +16,11 @@
 import unittest
 
 import numpy as np
-from op_test import OpTest
 
 import paddle
 import paddle.fluid as fluid
 import paddle.fluid.core as core
+from op_test import OpTest
 from paddle.fluid import Program, program_guard
 from paddle.fluid.op import Operator
 
@@ -517,12 +517,14 @@ class TestDataNormOpWithSlotDim(OpTest):
 
 class TestDataNormOpErrorr(unittest.TestCase):
     def test_errors(self):
+        paddle.enable_static()
         with program_guard(Program(), Program()):
             x2 = fluid.layers.data(name='x2', shape=[3, 4], dtype="int32")
             # self.assertRaises(TypeError, fluid.data_norm, x2)
             paddle.static.nn.data_norm(
                 input=x2, param_attr={}, enable_scale_and_shift=True
             )
+        paddle.disable_static()
 
 
 if __name__ == '__main__':

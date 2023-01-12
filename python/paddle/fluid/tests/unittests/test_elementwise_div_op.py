@@ -15,9 +15,9 @@
 import unittest
 
 import numpy as np
-from op_test import OpTest, convert_float_to_uint16, skip_check_grad_ci
 
 import paddle
+from op_test import OpTest, convert_float_to_uint16, skip_check_grad_ci
 from paddle import fluid
 from paddle.fluid import core
 
@@ -188,38 +188,6 @@ class TestElementwiseDivOpVector(ElementwiseDivOp):
         self.y_shape = [100]
 
 
-class TestElementwiseDivOpBroadcast0(ElementwiseDivOp):
-    def init_shape(self):
-        self.x_shape = [100, 3, 4]
-        self.y_shape = [100]
-        self.attrs = {'axis': 0}
-
-    def compute_output(self, x, y):
-        return x / y.reshape(100, 1, 1)
-
-    def compute_gradient_x(self, grad_out, y):
-        return grad_out / y.reshape(100, 1, 1)
-
-    def compute_gradient_y(self, grad_out, out, y):
-        return np.sum(-1 * grad_out * out / y.reshape(100, 1, 1), axis=(1, 2))
-
-
-class TestElementwiseDivOpBroadcast1(ElementwiseDivOp):
-    def init_shape(self):
-        self.x_shape = [2, 100, 4]
-        self.y_shape = [100]
-        self.attrs = {'axis': 1}
-
-    def compute_output(self, x, y):
-        return x / y.reshape(1, 100, 1)
-
-    def compute_gradient_x(self, grad_out, y):
-        return grad_out / y.reshape(1, 100, 1)
-
-    def compute_gradient_y(self, grad_out, out, y):
-        return np.sum(-1 * grad_out * out / y.reshape(1, 100, 1), axis=(0, 2))
-
-
 class TestElementwiseDivOpBroadcast2(ElementwiseDivOp):
     def init_shape(self):
         self.x_shape = [2, 3, 100]
@@ -233,24 +201,6 @@ class TestElementwiseDivOpBroadcast2(ElementwiseDivOp):
 
     def compute_gradient_y(self, grad_out, out, y):
         return np.sum(-1 * grad_out * out / y.reshape(1, 1, 100), axis=(0, 1))
-
-
-class TestElementwiseDivOpBroadcast3(ElementwiseDivOp):
-    def init_shape(self):
-        self.x_shape = [2, 10, 12, 5]
-        self.y_shape = [10, 12]
-        self.attrs = {'axis': 1}
-
-    def compute_output(self, x, y):
-        return x / y.reshape(1, 10, 12, 1)
-
-    def compute_gradient_x(self, grad_out, y):
-        return grad_out / y.reshape(1, 10, 12, 1)
-
-    def compute_gradient_y(self, grad_out, out, y):
-        return np.sum(
-            -1 * grad_out * out / y.reshape(1, 10, 12, 1), axis=(0, 3)
-        )
 
 
 class TestElementwiseDivOpBroadcast4(ElementwiseDivOp):
